@@ -1,3 +1,4 @@
+import argparse
 import Augmentor
 import os
 def makedir(path):
@@ -7,9 +8,15 @@ def makedir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-datasets_root_dir = './datasets/cub200_cropped/'
-dir = datasets_root_dir + 'train_cropped/'
-target_dir = datasets_root_dir + 'train_cropped_augmented/'
+parser = argparse.ArgumentParser()
+parser.add_argument('-dd', '--data_dir', default='./datasets/cub200_cropped')
+parser.add_argument('-in', '--input_name', default='train_cropped')
+parser.add_argument('-on', '--output_name', default='train_cropped_augmented')
+args = parser.parse_args()
+
+datasets_root_dir = args.data_dir
+dir = os.path.join(datasets_root_dir, args.input_name)
+target_dir = os.path.join(datasets_root_dir, args.output_name)
 
 makedir(target_dir)
 folders = [os.path.join(dir, folder) for folder in next(os.walk(dir))[1]]
