@@ -22,7 +22,8 @@ def push_prototypes(dataloader, # pytorch dataloader (must be unnormalized in [0
                     proto_bound_boxes_filename_prefix=None,
                     save_prototype_class_identity=True, # which class the prototype image comes from
                     log=print,
-                    prototype_activation_function_in_numpy=None):
+                    prototype_activation_function_in_numpy=None,
+                    augment=False):
 
     prototype_network_parallel.eval()
     log('\tpush')
@@ -95,7 +96,8 @@ def push_prototypes(dataloader, # pytorch dataloader (must be unnormalized in [0
                                    dir_for_saving_prototypes=proto_epoch_dir,
                                    prototype_img_filename_prefix=prototype_img_filename_prefix,
                                    prototype_self_act_filename_prefix=prototype_self_act_filename_prefix,
-                                   prototype_activation_function_in_numpy=prototype_activation_function_in_numpy)
+                                   prototype_activation_function_in_numpy=prototype_activation_function_in_numpy,
+                                   augment=augment)
 
     if proto_epoch_dir != None and proto_bound_boxes_filename_prefix != None:
         np.save(os.path.join(proto_epoch_dir, proto_bound_boxes_filename_prefix + '-receptive_field' + str(epoch_number) + '.npy'),
@@ -127,7 +129,8 @@ def update_prototypes_on_batch(search_batch_input,
                                dir_for_saving_prototypes=None,
                                prototype_img_filename_prefix=None,
                                prototype_self_act_filename_prefix=None,
-                               prototype_activation_function_in_numpy=None):
+                               prototype_activation_function_in_numpy=None,
+                               augment=False):
 
     prototype_network_parallel.eval()
 
@@ -213,6 +216,13 @@ def update_prototypes_on_batch(search_batch_input,
             # get the whole image
             original_img_j = search_batch_input[rf_prototype_j[0]]
             original_img_j = original_img_j.numpy()
+
+            if augment:
+                def normalize(x):
+                    x_min = x.min()
+                    x_max = x.max()
+                    return (x - x_min)/(x_max - x_min)
+                original_img_j = normalize(original_img_j)
             original_img_j = np.transpose(original_img_j, (1, 2, 0))
             original_img_size = original_img_j.shape[0]
             
